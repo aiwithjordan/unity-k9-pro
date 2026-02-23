@@ -1,64 +1,28 @@
 import { NextResponse } from 'next/server';
-
-interface DriveFile {
-  id: string;
-  name: string;
-}
-
-function seededRandom(seed: number) {
-  const x = Math.sin(seed) * 10000;
-  return x - Math.floor(x);
-}
-
-function getTimeSeed() {
-  const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
-  return Math.floor(Date.now() / threeDaysMs);
-}
-
-function shuffleWithSeed(array: DriveFile[], seed: number): DriveFile[] {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(seededRandom(seed + i) * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
+import fs from 'fs';
+import path from 'path';
 
 export async function GET() {
-  const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
-  const apiKey = process.env.GOOGLE_DRIVE_API_KEY;
-
-  if (!folderId || !apiKey) {
-    return NextResponse.json({ images: [], configured: false });
-  }
-
   try {
-    const driveApiUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'image'&key=${apiKey}&fields=files(id,name)&pageSize=50`;
-
-    const response = await fetch(driveApiUrl, {
-      next: { revalidate: 259200 }
+    const imagesDir = path.join(process.cwd(), 'public/images');
+    const files = fs.readdirSync(imagesDir);
+    
+    // Filter for image files only (not logo or venmo-qr)
+    const heroImages = files.filter(file => {
+      const isImage = /\.(jpg|jpeg|png|webp)$/i.test(file);
+      const isNotLogo = !file.includes('logo');
+      const isNotVenmo = !file.includes('venmo');
+      return isImage && isNotLogo && isNotVenmo;
     });
 
-    if (!response.ok) throw new Error('API error');
-
-    const data = await response.json();
-    const allFiles: DriveFile[] = data.files || [];
+    // Shuffle randomly
+    const shuffled = heroImages.sort(() => Math.random() - 0.5);
     
-    if (allFiles.length === 0) {
-      return NextResponse.json({ images: [], configured: true });
-    }
+    // Pick 3 random images
+    const selected = shuffled.slice(0, 3).map(file => `/images/${file}`);
 
-    const seed = getTimeSeed();
-    const shuffled = shuffleWithSeed(allFiles, seed);
-    const selected = shuffled.slice(0, 3);
-    
-    const images = selected.map((file) => ({
-      id: file.id,
-      url: `https://drive.google.com/thumbnail?id=${file.id}&sz=w1920`,
-    }));
-
-    return NextResponse.json({ images, configured: true });
+    return NextResponse.json({ images: selected });
   } catch (error) {
-    return NextResponse.json({ images: [], error: true });
+    return NextResponse.json({ images: [] });
   }
 }
