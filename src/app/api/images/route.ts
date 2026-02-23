@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
 
+interface DriveFile {
+  id: string;
+  name: string;
+}
+
 function seededRandom(seed: number) {
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
@@ -10,7 +15,7 @@ function getTimeSeed() {
   return Math.floor(Date.now() / threeDaysMs);
 }
 
-function shuffleWithSeed<T>(array: T[], seed: number): T[] {
+function shuffleWithSeed(array: DriveFile[], seed: number): DriveFile[] {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(seededRandom(seed + i) * (i + 1));
@@ -37,7 +42,7 @@ export async function GET() {
     if (!response.ok) throw new Error('API error');
 
     const data = await response.json();
-    const allFiles = data.files || [];
+    const allFiles: DriveFile[] = data.files || [];
     
     if (allFiles.length === 0) {
       return NextResponse.json({ images: [], configured: true });
@@ -47,7 +52,7 @@ export async function GET() {
     const shuffled = shuffleWithSeed(allFiles, seed);
     const selected = shuffled.slice(0, 3);
     
-    const images = selected.map((file: { id: string; name: string }) => ({
+    const images = selected.map((file) => ({
       id: file.id,
       url: `https://drive.google.com/uc?export=view&id=${file.id}`,
     }));
