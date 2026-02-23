@@ -34,7 +34,7 @@ function HeroCarousel({ children }: { children: React.ReactNode }) {
         const data = await res.json();
         
         if (data.images && data.images.length > 0) {
-          setImages(data.images.map((img: { url: string }) => img.url));
+          setImages(data.images.map((img: { url: string }) => `/api/proxy?url=${encodeURIComponent(img.url)}`));
         }
       } catch {
         console.log('Failed to fetch images');
