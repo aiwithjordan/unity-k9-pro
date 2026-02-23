@@ -1,8 +1,23 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import fs from 'fs';
+import path from 'path';
+import HeroCarousel from './HeroCarousel';
+
+// Get images at build time
+function getHeroImages() {
+  const imagesDir = path.join(process.cwd(), 'public/images');
+  const files = fs.readdirSync(imagesDir);
+  
+  return files
+    .filter(file => {
+      const isImage = /\.(jpg|jpeg|png|webp)$/i.test(file);
+      const isNotLogo = !file.toLowerCase().includes('logo');
+      const isNotVenmo = !file.toLowerCase().includes('venmo');
+      return isImage && isNotLogo && isNotVenmo;
+    })
+    .map(file => `/images/${file}`);
+}
 
 const config = {
   name: "Unity K9 Express Rescue & Outreach",
@@ -22,74 +37,12 @@ const config = {
   },
 };
 
-function HeroCarousel({ children }: { children: React.ReactNode }) {
-  const [images, setImages] = useState<string[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    async function fetchImages() {
-      try {
-        const res = await fetch('/api/images');
-        const data = await res.json();
-        if (data.images && data.images.length > 0) {
-          setImages(data.images);
-        }
-      } catch (error) {
-        console.log('Failed to load images');
-      }
-    }
-    fetchImages();
-  }, []);
-
-  useEffect(() => {
-    if (images.length <= 1) return;
-    
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % images.length);
-    }, 8000);
-
-    return () => clearInterval(interval);
-  }, [images.length]);
-
-  return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-[#0f2d4d]" />
-      
-      {images.map((src, index) => (
-        <div
-          key={src}
-          className={`absolute inset-0 transition-opacity duration-[2000ms] ${
-            index === currentIndex ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          <img src={src} alt="" className="w-full h-full object-cover" />
-        </div>
-      ))}
-      
-      <div className="absolute inset-0 bg-black/50" />
-      
-      <div className="relative z-10 w-full">{children}</div>
-
-      {images.length > 1 && (
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-          {images.map((_, index) => (
-            <div
-              key={index}
-              className={`h-1 rounded-full transition-all duration-500 ${
-                index === currentIndex ? 'bg-white w-8' : 'bg-white/50 w-2'
-              }`}
-            />
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
 export default function Home() {
+  const heroImages = getHeroImages();
+
   return (
     <main className="min-h-screen">
-      <HeroCarousel>
+      <HeroCarousel images={heroImages}>
         <div className="max-w-5xl mx-auto px-6 py-24 text-center text-white">
           <div className="mb-10">
             <Image
