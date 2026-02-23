@@ -54,7 +54,7 @@ export async function GET() {
     
     const images = selected.map((file) => ({
       id: file.id,
-      url: `https://drive.google.com/uc?export=view&id=${file.id}`,
+      url: `https://drive.google.com/thumbnail?id=${file.id}&sz=w1920`,
     }));
 
     return NextResponse.json({ images, configured: true });
