@@ -4,9 +4,6 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-/* =====================================================
-   EDIT YOUR LINKS AND INFO HERE
-   ===================================================== */
 const config = {
   name: "Unity K9 Express Rescue & Outreach",
   location: "Bakersfield, California",
@@ -25,13 +22,11 @@ const config = {
   },
 };
 
-// Background Image Carousel Component
 function HeroCarousel({ children }: { children: React.ReactNode }) {
   const [images, setImages] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Fetch 3 random images from Google Drive API
   useEffect(() => {
     async function fetchImages() {
       try {
@@ -42,14 +37,13 @@ function HeroCarousel({ children }: { children: React.ReactNode }) {
           setImages(data.images.map((img: { url: string }) => img.url));
         }
       } catch {
-        // No fallback - just show solid background
+        console.log('Failed to fetch images');
       }
       setIsLoaded(true);
     }
     fetchImages();
   }, []);
 
-  // Rotate images every 8 seconds
   useEffect(() => {
     if (images.length <= 1) return;
     
@@ -64,41 +58,42 @@ function HeroCarousel({ children }: { children: React.ReactNode }) {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Solid background color when no images */}
-      <div className="absolute inset-0 bg-brand-dark" />
+      {/* Fallback background - only shows if no images */}
+      <div className="absolute inset-0 bg-[#0f2d4d]" />
       
-      {/* Background Images - subtle, not distracting */}
+      {/* Background Images - NOW VISIBLE */}
       {hasImages && images.map((src, index) => (
         <div
           key={src}
           className={`absolute inset-0 transition-opacity duration-[2000ms] ${
-            index === currentIndex ? 'opacity-40' : 'opacity-0'
+            index === currentIndex ? 'opacity-100' : 'opacity-0'
           }`}
         >
           <img
             src={src}
             alt=""
-            className="w-full h-full object-cover blur-[2px] scale-105"
+            className="w-full h-full object-cover"
+            onError={(e) => console.log('Image failed to load:', src)}
           />
         </div>
       ))}
       
-      {/* Strong Dark Overlay - makes text dominant */}
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/80 via-brand-dark/70 to-brand-dark/90" />
+      {/* Dark Overlay - lighter so images show through */}
+      <div className="absolute inset-0 bg-black/50" />
       
-      {/* Content - always sharp and clear */}
+      {/* Content */}
       <div className="relative z-10 w-full">
         {children}
       </div>
 
-      {/* Subtle image indicators */}
+      {/* Image indicators */}
       {hasImages && images.length > 1 && (
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
           {images.map((_, index) => (
             <div
               key={index}
               className={`h-1 rounded-full transition-all duration-500 ${
-                index === currentIndex ? 'bg-white/80 w-8' : 'bg-white/30 w-2'
+                index === currentIndex ? 'bg-white w-8' : 'bg-white/50 w-2'
               }`}
             />
           ))}
@@ -111,10 +106,8 @@ function HeroCarousel({ children }: { children: React.ReactNode }) {
 export default function Home() {
   return (
     <main className="min-h-screen">
-      {/* Hero Section with Background Carousel */}
       <HeroCarousel>
         <div className="max-w-5xl mx-auto px-6 py-24 text-center text-white">
-          {/* Logo */}
           <div className="mb-10">
             <Image
               src="/images/logo.png"
@@ -126,12 +119,10 @@ export default function Home() {
             />
           </div>
 
-          {/* Location */}
-          <p className="text-sm uppercase tracking-[0.3em] text-white/60 mb-4 font-medium">
+          <p className="text-sm uppercase tracking-[0.3em] text-white/80 mb-4 font-medium">
             {config.location}
           </p>
 
-          {/* Title - Large and Dominant */}
           <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight drop-shadow-lg">
             Unity K9 Express Rescue
             <span className="block text-2xl md:text-4xl mt-3 font-light text-white/90">
@@ -139,23 +130,20 @@ export default function Home() {
             </span>
           </h1>
 
-          {/* Tagline - Clear and Bold */}
           <p className="text-2xl md:text-3xl font-medium text-white mb-6 drop-shadow-md">
             {config.tagline}
           </p>
 
-          {/* Description */}
-          <p className="max-w-2xl mx-auto text-white/80 text-lg leading-relaxed mb-14">
+          <p className="max-w-2xl mx-auto text-white/90 text-lg leading-relaxed mb-14 drop-shadow">
             {config.description}
           </p>
 
-          {/* Main Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <Link
               href={config.links.foster}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto px-12 py-5 bg-white text-brand-dark text-lg font-bold tracking-wide hover:bg-gray-100 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
+              className="w-full sm:w-auto px-12 py-5 bg-white text-gray-900 text-lg font-bold tracking-wide hover:bg-gray-100 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
             >
               BECOME A FOSTER
             </Link>
@@ -163,25 +151,23 @@ export default function Home() {
               href={config.links.transport}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto px-12 py-5 border-2 border-white text-white text-lg font-bold tracking-wide hover:bg-white hover:text-brand-dark transition-all"
+              className="w-full sm:w-auto px-12 py-5 border-2 border-white text-white text-lg font-bold tracking-wide hover:bg-white hover:text-gray-900 transition-all"
             >
               BECOME A DRIVER
             </Link>
           </div>
 
-          {/* Secondary Link */}
           <Link
             href={config.links.amazon}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block text-white/70 hover:text-white border-b border-white/30 hover:border-white pb-1 transition-all text-lg"
+            className="inline-block text-white/80 hover:text-white border-b border-white/40 hover:border-white pb-1 transition-all text-lg"
           >
             View Our Amazon Wishlist
           </Link>
         </div>
       </HeroCarousel>
 
-      {/* Donate Section */}
       <section className="py-24 bg-gray-50">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
@@ -192,17 +178,15 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col md:flex-row items-center justify-center gap-12">
-            {/* PayPal */}
             <Link
               href={config.links.paypal}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-14 py-5 bg-brand-blue text-white text-lg font-bold tracking-wide hover:bg-brand-dark transition-all shadow-lg hover:shadow-xl"
+              className="px-14 py-5 bg-[#1a4f8b] text-white text-lg font-bold tracking-wide hover:bg-[#0f2d4d] transition-all shadow-lg hover:shadow-xl"
             >
               DONATE VIA PAYPAL
             </Link>
 
-            {/* Venmo */}
             <div className="text-center">
               <Image
                 src="/images/venmo-qr.png"
@@ -219,8 +203,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-brand-dark text-white">
+      <section className="py-20 bg-[#0f2d4d] text-white">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
             <div>
@@ -243,7 +226,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="py-20 bg-gray-900 text-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <Image
@@ -263,7 +245,6 @@ export default function Home() {
             {config.email}
           </a>
 
-          {/* Social Links */}
           <div className="flex items-center justify-center gap-10 mt-10">
             <Link
               href={config.links.facebook}
