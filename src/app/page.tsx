@@ -25,21 +25,18 @@ const config = {
 function HeroCarousel({ children }: { children: React.ReactNode }) {
   const [images, setImages] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     async function fetchImages() {
       try {
         const res = await fetch('/api/images');
         const data = await res.json();
-        
         if (data.images && data.images.length > 0) {
-          setImages(data.images.map((img: { url: string }) => `/api/proxy?url=${encodeURIComponent(img.url)}`));
+          setImages(data.images);
         }
-      } catch {
-        console.log('Failed to fetch images');
+      } catch (error) {
+        console.log('Failed to load images');
       }
-      setIsLoaded(true);
     }
     fetchImages();
   }, []);
@@ -54,40 +51,26 @@ function HeroCarousel({ children }: { children: React.ReactNode }) {
     return () => clearInterval(interval);
   }, [images.length]);
 
-  const hasImages = isLoaded && images.length > 0;
-
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Fallback background - only shows if no images */}
       <div className="absolute inset-0 bg-[#0f2d4d]" />
       
-      {/* Background Images - NOW VISIBLE */}
-      {hasImages && images.map((src, index) => (
+      {images.map((src, index) => (
         <div
           key={src}
           className={`absolute inset-0 transition-opacity duration-[2000ms] ${
             index === currentIndex ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          <img
-            src={src}
-            alt=""
-            className="w-full h-full object-cover"
-            onError={(e) => console.log('Image failed to load:', src)}
-          />
+          <img src={src} alt="" className="w-full h-full object-cover" />
         </div>
       ))}
       
-      {/* Dark Overlay - lighter so images show through */}
       <div className="absolute inset-0 bg-black/50" />
       
-      {/* Content */}
-      <div className="relative z-10 w-full">
-        {children}
-      </div>
+      <div className="relative z-10 w-full">{children}</div>
 
-      {/* Image indicators */}
-      {hasImages && images.length > 1 && (
+      {images.length > 1 && (
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
           {images.map((_, index) => (
             <div
