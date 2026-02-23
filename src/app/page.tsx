@@ -16,7 +16,7 @@ function getHeroImages() {
       const isNotVenmo = !file.toLowerCase().includes('venmo');
       return isImage && isNotLogo && isNotVenmo;
     })
-    .map(file => `/images/${file}`);
+    .map(file => `/images/${encodeURIComponent(file)}`);
 }
 
 const config = {
