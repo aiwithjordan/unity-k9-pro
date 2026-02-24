@@ -1,143 +1,159 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import fs from 'fs';
-import path from 'path';
-import HeroSection from './HeroSection';
 
-// Get all images at build time
-function getAllImages() {
-  const imagesDir = path.join(process.cwd(), 'public/images');
+// Pick 3 random images based on date (changes daily)
+function getDailyImages(allImages: string[], count: number = 3) {
+  if (allImages.length <= count) return allImages;
 
-  // Fail safely if folder doesn't exist
-  if (!fs.existsSync(imagesDir)) return [];
+  // Use today's date as seed
+  const today = new Date();
+  const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
 
-  const files = fs.readdirSync(imagesDir);
+  // Simple seeded shuffle
+  const shuffled = [...allImages];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const raw = Math.floor((Math.sin(seed + i) * 10000) % (i + 1));
+    const j = Math.abs(raw) % (i + 1);
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
 
-  return files
-    .filter(file => {
-      const isImage = /\.(jpg|jpeg|png|webp)$/i.test(file);
-      const lower = file.toLowerCase();
-
-      const isNotLogo = !lower.includes('logo');
-      const isNotVenmo = !lower.includes('venmo');
-      const isNotQr = !lower.includes('qr');
-
-      return isImage && isNotLogo && isNotVenmo && isNotQr;
-    })
-    .map(file => `/images/${encodeURIComponent(file)}`);
+  return shuffled.slice(0, count);
 }
 
-const config = {
-  name: "Unity K9 Express Rescue & Outreach",
-  location: "Bakersfield, California",
-  tagline: "Saving dogs from euthanasia in Kern County",
-  description: "We are an all-volunteer rescue dedicated to pulling dogs from high-kill shelters and placing them in loving foster homes until they find their forever families.",
-  email: "unityrescue@gmail.com",
+interface Props {
+  images: string[];
+  config: {
+    name: string;
+    location: string;
+    tagline: string;
+    description: string;
+    links: {
+      foster: string;
+      transport: string;
+      amazon: string;
+    };
+  };
+}
 
-  links: {
-    foster: "https://docs.google.com/forms/d/e/1FAIpQLSe2oDaj7shXfqAQOChu3BoSBAu6hnDIyx3avyIe9GtDv9Pzfw/viewform",
-    transport: "https://docs.google.com/forms/d/e/1FAIpQLSfYfTVynvp7aQwTPvZZcGNOxuR6NMeJHU32V1PDKNu8a7X-oQ/viewform",
-    amazon: "https://www.amazon.com/hz/wishlist/ls/1EIRWQ0LSIF27?ref_=wl_share",
-    paypal: "https://www.paypal.com/US/fundraiser/charity/4559439",
-    venmo: "@Unity-ExpressRescue",
-    facebook: "https://www.facebook.com/unityrescue/",
-    instagram: "https://www.instagram.com/unityk9expressrescue/",
-  },
-};
+export default function HeroSection({ images, config }: Props) {
+  const [dailyImages, setDailyImages] = useState<string[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-export default function Home() {
-  const allImages = getAllImages();
+  useEffect(() => {
+    setDailyImages(getDailyImages(images, 3));
+    setCurrentIndex(0);
+  }, [images]);
+
+  useEffect(() => {
+    if (dailyImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % dailyImages.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [dailyImages.length]);
 
   return (
-    <main>
-      <HeroSection images={allImages} config={config} />
-
-      {/* Donate Section */}
-      <section className="bg-gray-50 px-5 py-16 text-center">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-          Support Our Mission
-        </h2>
-        <p className="text-gray-600 text-sm max-w-md mx-auto mb-8">
-          100% of donations go directly to saving dogs. We are entirely volunteer-run.
-        </p>
-
-        <div className="flex flex-col items-center gap-8">
-          <Link
-            href={config.links.paypal}
-            target="_blank"
-            className="bg-[#1a4f8b] text-white font-bold py-3 px-10 text-sm uppercase tracking-wide"
+    <section className="relative min-h-[100svh] flex flex-col overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-[#0f2d4d]">
+        {dailyImages.map((src, i) => (
+          <div
+            key={src}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              i === currentIndex ? 'opacity-100' : 'opacity-0'
+            }`}
           >
-            Donate via PayPal
-          </Link>
-
-          <div>
-            <Image
-              src="/images/venmo-qr.png"
-              alt="Venmo"
-              width={120}
-              height={120}
-              className="mx-auto rounded-lg"
+            {/* Mobile: show full image so it doesn't zoom/crop too much */}
+            <img
+              src={src}
+              alt=""
+              className="w-full h-full object-contain object-center opacity-35 sm:hidden"
             />
-            <p className="text-gray-600 text-sm mt-2">
-              Venmo: <strong>{config.links.venmo}</strong>
-            </p>
-          </div>
-        </div>
-      </section>
 
-      {/* Stats */}
-      <section className="bg-[#0f2d4d] text-white px-5 py-12">
-        <div className="grid grid-cols-2 gap-6 max-w-lg mx-auto text-center">
-          <div>
-            <div className="text-3xl font-bold">2,000+</div>
-            <div className="text-xs text-white/60 uppercase">Dogs Saved Yearly</div>
+            {/* Desktop/tablet: allow cover for visual fill */}
+            <img
+              src={src}
+              alt=""
+              className="hidden sm:block w-full h-full object-cover object-center opacity-30"
+            />
           </div>
-          <div>
-            <div className="text-3xl font-bold">100%</div>
-            <div className="text-xs text-white/60 uppercase">Volunteer Run</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold">2021</div>
-            <div className="text-xs text-white/60 uppercase">Established</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold">Kern</div>
-            <div className="text-xs text-white/60 uppercase">County Based</div>
-          </div>
-        </div>
-      </section>
+        ))}
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white px-5 py-12 text-center">
-        <div className="mx-auto mb-4 h-[60px] w-[60px] rounded-full bg-white p-1 overflow-hidden flex items-center justify-center">
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-[#0f2d4d]/70 sm:bg-[#0f2d4d]/55" />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 flex-1 flex flex-col justify-center px-5 py-10 text-center text-white">
+        <div className="mx-auto bg-white rounded-full p-2 mb-6 w-[140px] h-[140px] flex items-center justify-center overflow-hidden">
           <Image
             src="/images/logo.png"
             alt={config.name}
-            width={52}
-            height={52}
+            width={124}
+            height={124}
             className="object-contain"
+            priority
             unoptimized
           />
         </div>
 
-        <p className="font-bold mb-1">{config.name}</p>
-        <a href={`mailto:${config.email}`} className="text-gray-400 text-sm">
-          {config.email}
-        </a>
+        <p className="text-xs uppercase tracking-widest text-white/70 mb-2">
+          {config.location}
+        </p>
 
-        <div className="flex justify-center gap-6 mt-6">
-          <Link href={config.links.facebook} target="_blank" className="text-gray-400 text-xs uppercase tracking-wider">
-            Facebook
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">
+          Unity K9 Express Rescue
+        </h1>
+        <p className="text-lg sm:text-xl text-white/80 mb-4">& Outreach</p>
+
+        <p className="text-base sm:text-lg font-medium mb-3">{config.tagline}</p>
+
+        <p className="text-sm text-white/70 max-w-md mx-auto mb-8">
+          {config.description}
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
+          <Link
+            href={config.links.foster}
+            target="_blank"
+            className="bg-white text-[#0f2d4d] font-bold py-3 px-8 text-sm uppercase tracking-wide"
+          >
+            Become a Foster
           </Link>
-          <Link href={config.links.instagram} target="_blank" className="text-gray-400 text-xs uppercase tracking-wider">
-            Instagram
+          <Link
+            href={config.links.transport}
+            target="_blank"
+            className="border-2 border-white text-white font-bold py-3 px-8 text-sm uppercase tracking-wide"
+          >
+            Become a Driver
           </Link>
         </div>
 
-        <p className="text-gray-600 text-xs mt-8">
-          © {new Date().getFullYear()} {config.name}
-        </p>
-      </footer>
-    </main>
+        <Link
+          href={config.links.amazon}
+          target="_blank"
+          className="text-white/70 text-sm underline"
+        >
+          View Amazon Wishlist
+        </Link>
+      </div>
+
+      {/* Image dots */}
+      {dailyImages.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+          {dailyImages.map((_, i) => (
+            <div
+              key={i}
+              className={`h-1.5 rounded-full transition-all ${
+                i === currentIndex ? 'bg-white w-6' : 'bg-white/40 w-1.5'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
