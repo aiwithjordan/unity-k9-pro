@@ -22,43 +22,37 @@ export default function HeroCarousel({
   }, [images.length]);
 
   return (
-    <section className="relative min-h-screen flex flex-col">
-      {/* Background color */}
-      <div className="absolute inset-0 bg-[#0f2d4d]" />
+    <section className="relative min-h-screen md:min-h-screen flex flex-col bg-[#0f2d4d]">
       
-      {/* Background Images - responsive fit */}
-      {images.map((src, index) => (
-        <div
-          key={src}
-          className={`absolute inset-0 transition-opacity duration-[2000ms] ${
-            index === currentIndex ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          {/* Desktop: cover the area, Mobile: contain full image */}
-          <img 
-            src={src} 
-            alt="" 
-            className="hidden md:block w-full h-full object-cover"
-          />
-          <img 
-            src={src} 
-            alt="" 
-            className="md:hidden w-full h-full object-contain object-top"
-          />
-        </div>
-      ))}
+      {/* Image Container - fixed aspect ratio on mobile */}
+      <div className="absolute inset-0 md:block">
+        {images.map((src, index) => (
+          <div
+            key={src}
+            className={`absolute inset-0 transition-opacity duration-[2000ms] ${
+              index === currentIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <img 
+              src={src} 
+              alt="" 
+              className="w-full h-full object-cover object-top"
+            />
+          </div>
+        ))}
+      </div>
       
       {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-black/50" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
       
       {/* Content */}
-      <div className="relative z-10 flex-1 flex items-center">
+      <div className="relative z-10 flex-1 flex items-center py-20">
         <div className="w-full">{children}</div>
       </div>
 
       {/* Image indicators */}
       {images.length > 1 && (
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
           {images.map((_, index) => (
             <div
               key={index}
