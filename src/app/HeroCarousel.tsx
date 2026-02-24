@@ -22,10 +22,10 @@ export default function HeroCarousel({
   }, [images.length]);
 
   return (
-    <section className="relative min-h-screen md:min-h-screen flex flex-col bg-[#0f2d4d]">
+    <section className="relative bg-[#0f2d4d]">
       
-      {/* Image Container - fixed aspect ratio on mobile */}
-      <div className="absolute inset-0 md:block">
+      {/* Image Container */}
+      <div className="absolute inset-0">
         {images.map((src, index) => (
           <div
             key={src}
@@ -36,23 +36,22 @@ export default function HeroCarousel({
             <img 
               src={src} 
               alt="" 
-              className="w-full h-full object-cover object-top"
+              className="w-full h-full object-cover object-center"
             />
           </div>
         ))}
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/50" />
       </div>
       
-      {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-      
-      {/* Content */}
-      <div className="relative z-10 flex-1 flex items-center py-20">
+      {/* Content - controls the height */}
+      <div className="relative z-10 px-6 py-16 md:py-24 md:min-h-screen md:flex md:items-center">
         <div className="w-full">{children}</div>
       </div>
 
       {/* Image indicators */}
       {images.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
           {images.map((_, index) => (
             <div
               key={index}
