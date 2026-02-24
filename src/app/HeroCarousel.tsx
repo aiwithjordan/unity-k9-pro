@@ -22,9 +22,11 @@ export default function HeroCarousel({
   }, [images.length]);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex flex-col">
+      {/* Background color */}
       <div className="absolute inset-0 bg-[#0f2d4d]" />
       
+      {/* Background Images - responsive fit */}
       {images.map((src, index) => (
         <div
           key={src}
@@ -32,19 +34,29 @@ export default function HeroCarousel({
             index === currentIndex ? 'opacity-100' : 'opacity-0'
           }`}
         >
+          {/* Desktop: cover the area, Mobile: contain full image */}
           <img 
             src={src} 
             alt="" 
-            className="w-full h-full object-cover object-center"
-            style={{ objectPosition: 'center 30%' }}
+            className="hidden md:block w-full h-full object-cover"
+          />
+          <img 
+            src={src} 
+            alt="" 
+            className="md:hidden w-full h-full object-contain object-top"
           />
         </div>
       ))}
       
+      {/* Dark Overlay */}
       <div className="absolute inset-0 bg-black/50" />
       
-      <div className="relative z-10 w-full">{children}</div>
+      {/* Content */}
+      <div className="relative z-10 flex-1 flex items-center">
+        <div className="w-full">{children}</div>
+      </div>
 
+      {/* Image indicators */}
       {images.length > 1 && (
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
           {images.map((_, index) => (
