@@ -1,10 +1,23 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import fs from 'fs';
 import path from 'path';
+import HeroSection from './HeroSection';
+
+// Get all images at build time
+function getAllImages() {
+  const imagesDir = path.join(process.cwd(), 'public/images');
+  const files = fs.readdirSync(imagesDir);
+  
+  return files
+    .filter(file => {
+      const isImage = /\.(jpg|jpeg|png|webp)$/i.test(file);
+      const isNotLogo = !file.toLowerCase().includes('logo');
+      const isNotVenmo = !file.toLowerCase().includes('venmo');
+      return isImage && isNotLogo && isNotVenmo;
+    })
+    .map(file => `/images/${encodeURIComponent(file)}`);
+}
 
 const config = {
   name: "Unity K9 Express Rescue & Outreach",
@@ -22,110 +35,14 @@ const config = {
     facebook: "https://www.facebook.com/unityrescue/",
     instagram: "https://www.instagram.com/unityk9expressrescue/",
   },
-
-  heroImages: [
-    '/images/hero1.jpg',
-    '/images/hero2.jpg', 
-    '/images/hero3.jpg',
-  ],
 };
 
 export default function Home() {
-  const [currentImage, setCurrentImage] = useState(0);
-  const images = config.heroImages;
-
-  useEffect(() => {
-    if (images.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentImage((prev) => (prev + 1) % images.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [images.length]);
+  const allImages = getAllImages();
 
   return (
     <main>
-      {/* Hero Section - Mobile First */}
-      <section className="relative min-h-[100svh] flex flex-col">
-        {/* Background */}
-        <div className="absolute inset-0 bg-[#0f2d4d]">
-          {images.map((src, i) => (
-            <div
-              key={src}
-              className={`absolute inset-0 transition-opacity duration-1000 ${
-                i === currentImage ? 'opacity-30' : 'opacity-0'
-              }`}
-            >
-              <img src={src} alt="" className="w-full h-full object-cover" />
-            </div>
-          ))}
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 flex-1 flex flex-col justify-center px-5 py-10 text-center text-white">
-          <Image
-            src="/images/logo.png"
-            alt={config.name}
-            width={140}
-            height={140}
-            className="mx-auto bg-white rounded-full p-3 mb-6"
-            priority
-          />
-
-          <p className="text-xs uppercase tracking-widest text-white/70 mb-2">
-            {config.location}
-          </p>
-
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">
-            Unity K9 Express Rescue
-          </h1>
-          <p className="text-lg sm:text-xl text-white/80 mb-4">& Outreach</p>
-
-          <p className="text-base sm:text-lg font-medium mb-3">{config.tagline}</p>
-
-          <p className="text-sm text-white/70 max-w-md mx-auto mb-8">
-            {config.description}
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
-            <Link
-              href={config.links.foster}
-              target="_blank"
-              className="bg-white text-[#0f2d4d] font-bold py-3 px-8 text-sm uppercase tracking-wide"
-            >
-              Become a Foster
-            </Link>
-            <Link
-              href={config.links.transport}
-              target="_blank"
-              className="border-2 border-white text-white font-bold py-3 px-8 text-sm uppercase tracking-wide"
-            >
-              Become a Driver
-            </Link>
-          </div>
-
-          <Link
-            href={config.links.amazon}
-            target="_blank"
-            className="text-white/70 text-sm underline"
-          >
-            View Amazon Wishlist
-          </Link>
-        </div>
-
-        {/* Image dots */}
-        {images.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-            {images.map((_, i) => (
-              <div
-                key={i}
-                className={`h-1.5 rounded-full ${
-                  i === currentImage ? 'bg-white w-6' : 'bg-white/40 w-1.5'
-                }`}
-              />
-            ))}
-          </div>
-        )}
-      </section>
+      <HeroSection images={allImages} config={config} />
 
       {/* Donate Section */}
       <section className="bg-gray-50 px-5 py-16 text-center">
