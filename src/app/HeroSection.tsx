@@ -88,15 +88,12 @@ export default function HeroSection({ images, config }: Props) {
 
       {/* Content */}
       <div className="relative z-10 flex-1 flex flex-col justify-center px-5 py-10 text-center text-white">
-        <div className="mx-auto bg-white rounded-full p-2 mb-6 w-[140px] h-[140px] flex items-center justify-center overflow-hidden">
-          <Image
+        <div className="mx-auto bg-white rounded-full mb-6 w-[180px] h-[180px] flex items-center justify-center overflow-hidden p-2 shadow-sm">
+          <img
             src="/images/logo.png"
             alt={config.name}
-            width={124}
-            height={124}
-            className="object-contain"
-            priority
-            unoptimized
+            className="w-[165px] h-[165px] object-contain block"
+            draggable={false}
           />
         </div>
 
