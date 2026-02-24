@@ -35,7 +35,7 @@ const config = {
   location: "Bakersfield, California",
   tagline: "Saving dogs from euthanasia in Kern County",
   description: "We are an all-volunteer rescue dedicated to pulling dogs from high-kill shelters and placing them in loving foster homes until they find their forever families.",
-  email: "unityrescue@gmail.com",
+  email: "unityk9expressrescue@gmail.com",
 
   links: {
     foster: "https://docs.google.com/forms/d/e/1FAIpQLSe2oDaj7shXfqAQOChu3BoSBAu6hnDIyx3avyIe9GtDv9Pzfw/viewform",
