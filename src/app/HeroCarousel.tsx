@@ -32,7 +32,12 @@ export default function HeroCarousel({
             index === currentIndex ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          <img src={src} alt="" className="w-full h-full object-cover" />
+          <img 
+            src={src} 
+            alt="" 
+            className="w-full h-full object-cover object-center"
+            style={{ objectPosition: 'center 30%' }}
+          />
         </div>
       ))}
       
