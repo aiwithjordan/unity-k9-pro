@@ -4,22 +4,25 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-// Pick 3 random images based on date (changes daily)
+// Pick 3 random images based on date (changes daily, stays the same all day)
 function getDailyImages(allImages: string[], count: number = 3) {
   if (allImages.length <= count) return allImages;
-  
-  // Use today's date as seed
+
   const today = new Date();
-  const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-  
-  // Simple seeded shuffle
+  const seed =
+    today.getFullYear() * 10000 +
+    (today.getMonth() + 1) * 100 +
+    today.getDate();
+
   const shuffled = [...allImages];
+
+  // Seeded shuffle (stable for the same date)
   for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor((Math.sin(seed + i) * 10000) % (i + 1));
-    const k = j < 0 ? -j : j;
-    [shuffled[i], shuffled[k % (i + 1)]] = [shuffled[k % (i + 1)], shuffled[i]];
+    const raw = Math.floor((Math.sin(seed + i) * 10000) % (i + 1));
+    const j = Math.abs(raw) % (i + 1);
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  
+
   return shuffled.slice(0, count);
 }
 
@@ -42,44 +45,73 @@ export default function HeroSection({ images, config }: Props) {
   const [dailyImages, setDailyImages] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // Pick 3 images for the current day
   useEffect(() => {
-    setDailyImages(getDailyImages(images, 3));
+    const selected = getDailyImages(images, 3);
+    setDailyImages(selected);
+    setCurrentIndex(0);
   }, [images]);
 
+  // Auto-rotate every 6 seconds
   useEffect(() => {
     if (dailyImages.length <= 1) return;
+
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % dailyImages.length);
     }, 6000);
+
     return () => clearInterval(interval);
-  }, [dailyImages.length]);
+  }, [dailyImages]);
 
   return (
-    <section className="relative min-h-[100svh] flex flex-col">
-      {/* Background */}
-      <div className="absolute inset-0 bg-[#0f2d4d]">
+    <section className="relative min-h-[100svh] flex flex-col bg-[#0f2d4d] overflow-hidden">
+      {/* Background carousel */}
+      <div className="absolute inset-0">
         {dailyImages.map((src, i) => (
           <div
             key={src}
             className={`absolute inset-0 transition-opacity duration-1000 ${
-              i === currentIndex ? 'opacity-30' : 'opacity-0'
+              i === currentIndex ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            <img src={src} alt="" className="w-full h-full object-cover" />
+            {/* Mobile: show full image (less cropping) */}
+            <div className="h-full w-full sm:hidden">
+              <img
+                src={src}
+                alt=""
+                className="w-full h-full object-contain object-center opacity-35"
+              />
+            </div>
+
+            {/* Tablet/Desktop: fill hero (cropping allowed) */}
+            <div className="hidden sm:block h-full w-full">
+              <img
+                src={src}
+                alt=""
+                className="w-full h-full object-cover object-center opacity-30"
+              />
+            </div>
           </div>
         ))}
+
+        {/* Overlay for readability */}
+        <div className="absolute inset-0 bg-[#0f2d4d]/70 sm:bg-[#0f2d4d]/55" />
       </div>
 
       {/* Content */}
       <div className="relative z-10 flex-1 flex flex-col justify-center px-5 py-10 text-center text-white">
-        <Image
-          src="/images/logo.png"
-          alt={config.name}
-          width={140}
-          height={140}
-          className="mx-auto bg-white rounded-full p-3 mb-6"
-          priority
-        />
+        {/* Logo wrapper helps hide edge artifacts */}
+        <div className="mx-auto mb-6 h-[140px] w-[140px] rounded-full bg-white p-2 overflow-hidden flex items-center justify-center">
+          <Image
+            src="/images/logo.png"
+            alt={config.name}
+            width={124}
+            height={124}
+            className="object-contain"
+            priority
+            unoptimized
+          />
+        </div>
 
         <p className="text-xs uppercase tracking-widest text-white/70 mb-2">
           {config.location}
@@ -92,7 +124,7 @@ export default function HeroSection({ images, config }: Props) {
 
         <p className="text-base sm:text-lg font-medium mb-3">{config.tagline}</p>
 
-        <p className="text-sm text-white/70 max-w-md mx-auto mb-8">
+        <p className="text-sm text-white/80 max-w-md mx-auto mb-8">
           {config.description}
         </p>
 
@@ -104,6 +136,7 @@ export default function HeroSection({ images, config }: Props) {
           >
             Become a Foster
           </Link>
+
           <Link
             href={config.links.transport}
             target="_blank"
@@ -116,13 +149,13 @@ export default function HeroSection({ images, config }: Props) {
         <Link
           href={config.links.amazon}
           target="_blank"
-          className="text-white/70 text-sm underline"
+          className="text-white/80 text-sm underline"
         >
           View Amazon Wishlist
         </Link>
       </div>
 
-      {/* Image dots */}
+      {/* Carousel dots */}
       {dailyImages.length > 1 && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
           {dailyImages.map((_, i) => (
