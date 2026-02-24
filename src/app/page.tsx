@@ -50,7 +50,7 @@ export default function Home() {
               alt={config.name}
               width={180}
               height={180}
-              className="mx-auto bg-white rounded-full p-4 shadow-2xl"
+              className="mx-auto bg-white rounded-full p-6 shadow-2xl"
               priority
             />
           </div>
@@ -169,7 +169,7 @@ export default function Home() {
             alt={config.name}
             width={90}
             height={90}
-            className="mx-auto mb-6 bg-white rounded-full p-2"
+            className="mx-auto mb-6 bg-white rounded-full p-4"
           />
 
           <h3 className="text-xl font-bold mb-3">{config.name}</h3>
