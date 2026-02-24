@@ -22,7 +22,10 @@ function getAllImages() {
       const isNotVenmo = !lower.includes('venmo');
       const isNotQr = !lower.includes('qr');
 
-      return isImage && isNotLogo && isNotVenmo && isNotQr;
+      // EXCLUDE your actual logo file name
+      const isNotNamedLogoFile = lower !== 'images.jpg';
+
+      return isImage && isNotLogo && isNotVenmo && isNotQr && isNotNamedLogoFile;
     })
     .map(file => `/images/${encodeURIComponent(file)}`);
 }
@@ -111,7 +114,7 @@ export default function Home() {
       <footer className="bg-gray-900 text-white px-5 py-12 text-center">
         <div className="mx-auto mb-4 h-[76px] w-[76px] rounded-full bg-white overflow-hidden flex items-center justify-center">
           <Image
-            src="/images/logo.png"
+            src="/images/images.jpg"
             alt={config.name}
             width={68}
             height={68}
