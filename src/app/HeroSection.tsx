@@ -88,17 +88,17 @@ export default function HeroSection({ images, config }: Props) {
 
       {/* Content */}
       <div className="relative z-10 flex-1 flex flex-col justify-center px-5 py-10 text-center text-white">
-       <div className="mx-auto mb-6 w-[190px] h-[190px] rounded-full bg-white overflow-hidden flex items-center justify-center">
-        <Image
-          src="/images/logo.png"
-          alt={config.name}
-          width={176}
-          height={176}
-          className="object-contain block"
-          priority
-          quality={100}
-        />
-      </div>
+        <div className="mx-auto mb-6 w-[190px] h-[190px] rounded-full bg-white overflow-hidden flex items-center justify-center">
+          <Image
+            src="/images/logo.png"
+            alt={config.name}
+            width={176}
+            height={176}
+            className="object-contain block"
+            priority
+            quality={100}
+          />
+        </div>
 
         <p className="text-xs uppercase tracking-widest text-white/70 mb-2">
           {config.location}
