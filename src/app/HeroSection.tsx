@@ -90,7 +90,7 @@ export default function HeroSection({ images, config }: Props) {
       <div className="relative z-10 flex-1 flex flex-col justify-center px-5 py-10 text-center text-white">
         <div className="mx-auto mb-6 w-[190px] h-[190px] rounded-full bg-white overflow-hidden flex items-center justify-center">
           <Image
-            src="/images/logo.png"
+            src="/images/images.jpg"
             alt={config.name}
             width={176}
             height={176}
