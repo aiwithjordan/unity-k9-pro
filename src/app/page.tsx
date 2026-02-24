@@ -109,12 +109,14 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white px-5 py-12 text-center">
-        <div className="mx-auto mb-4 h-[72px] w-[72px] rounded-full bg-white p-1 overflow-hidden flex items-center justify-center">
-          <img
+        <div className="mx-auto mb-4 h-[76px] w-[76px] rounded-full bg-white overflow-hidden flex items-center justify-center">
+          <Image
             src="/images/logo.png"
             alt={config.name}
-            className="w-[64px] h-[64px] object-contain block"
-            draggable={false}
+            width={68}
+            height={68}
+            className="object-contain block"
+            quality={100}
           />
         </div>
 
