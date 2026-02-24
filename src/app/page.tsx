@@ -7,14 +7,22 @@ import HeroSection from './HeroSection';
 // Get all images at build time
 function getAllImages() {
   const imagesDir = path.join(process.cwd(), 'public/images');
+
+  // Fail safely if folder doesn't exist
+  if (!fs.existsSync(imagesDir)) return [];
+
   const files = fs.readdirSync(imagesDir);
-  
+
   return files
     .filter(file => {
       const isImage = /\.(jpg|jpeg|png|webp)$/i.test(file);
-      const isNotLogo = !file.toLowerCase().includes('logo');
-      const isNotVenmo = !file.toLowerCase().includes('venmo');
-      return isImage && isNotLogo && isNotVenmo;
+      const lower = file.toLowerCase();
+
+      const isNotLogo = !lower.includes('logo');
+      const isNotVenmo = !lower.includes('venmo');
+      const isNotQr = !lower.includes('qr');
+
+      return isImage && isNotLogo && isNotVenmo && isNotQr;
     })
     .map(file => `/images/${encodeURIComponent(file)}`);
 }
@@ -25,7 +33,7 @@ const config = {
   tagline: "Saving dogs from euthanasia in Kern County",
   description: "We are an all-volunteer rescue dedicated to pulling dogs from high-kill shelters and placing them in loving foster homes until they find their forever families.",
   email: "unityrescue@gmail.com",
-  
+
   links: {
     foster: "https://docs.google.com/forms/d/e/1FAIpQLSe2oDaj7shXfqAQOChu3BoSBAu6hnDIyx3avyIe9GtDv9Pzfw/viewform",
     transport: "https://docs.google.com/forms/d/e/1FAIpQLSfYfTVynvp7aQwTPvZZcGNOxuR6NMeJHU32V1PDKNu8a7X-oQ/viewform",
@@ -101,13 +109,17 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white px-5 py-12 text-center">
-        <Image
-          src="/images/logo.png"
-          alt={config.name}
-          width={60}
-          height={60}
-          className="mx-auto bg-white rounded-full p-1 mb-4"
-        />
+        <div className="mx-auto mb-4 h-[60px] w-[60px] rounded-full bg-white p-1 overflow-hidden flex items-center justify-center">
+          <Image
+            src="/images/logo.png"
+            alt={config.name}
+            width={52}
+            height={52}
+            className="object-contain"
+            unoptimized
+          />
+        </div>
+
         <p className="font-bold mb-1">{config.name}</p>
         <a href={`mailto:${config.email}`} className="text-gray-400 text-sm">
           {config.email}
