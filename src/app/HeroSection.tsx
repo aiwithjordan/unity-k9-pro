@@ -70,14 +70,14 @@ export default function HeroSection({ images, config }: Props) {
             <img
               src={src}
               alt=""
-              className="w-full h-full object-contain object-center opacity-35 sm:hidden"
+              className="w-full h-full object-contain object-center opacity-45 sm:hidden"
             />
 
             {/* Desktop/tablet: allow cover for visual fill */}
             <img
               src={src}
               alt=""
-              className="hidden sm:block w-full h-full object-cover object-center opacity-30"
+              className="hidden sm:block w-full h-full object-cover object-center opacity-45"
             />
           </div>
         ))}
