@@ -1,23 +1,10 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import fs from 'fs';
 import path from 'path';
-import HeroCarousel from './HeroCarousel';
-
-// Get images at build time
-function getHeroImages() {
-  const imagesDir = path.join(process.cwd(), 'public/images');
-  const files = fs.readdirSync(imagesDir);
-  
-  return files
-    .filter(file => {
-      const isImage = /\.(jpg|jpeg|png|webp)$/i.test(file);
-      const isNotLogo = !file.toLowerCase().includes('logo');
-      const isNotVenmo = !file.toLowerCase().includes('venmo');
-      return isImage && isNotLogo && isNotVenmo;
-    })
-    .map(file => `/images/${encodeURIComponent(file)}`);
-}
 
 const config = {
   name: "Unity K9 Express Rescue & Outreach",
@@ -35,180 +22,192 @@ const config = {
     facebook: "https://www.facebook.com/unityrescue/",
     instagram: "https://www.instagram.com/unityk9expressrescue/",
   },
+
+  heroImages: [
+    '/images/hero1.jpg',
+    '/images/hero2.jpg', 
+    '/images/hero3.jpg',
+  ],
 };
 
 export default function Home() {
-  const heroImages = getHeroImages();
+  const [currentImage, setCurrentImage] = useState(0);
+  const images = config.heroImages;
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentImage((prev) => (prev + 1) % images.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [images.length]);
 
   return (
-    <main className="min-h-screen">
-      <HeroCarousel images={heroImages}>
-        <div className="max-w-5xl mx-auto px-6 py-24 text-center text-white">
-          <div className="mb-10">
-            <Image
-              src="/images/logo.png"
-              alt={config.name}
-              width={180}
-              height={180}
-              className="mx-auto bg-white rounded-full p-6 shadow-2xl"
-              priority
-            />
-          </div>
+    <main>
+      {/* Hero Section - Mobile First */}
+      <section className="relative min-h-[100svh] flex flex-col">
+        {/* Background */}
+        <div className="absolute inset-0 bg-[#0f2d4d]">
+          {images.map((src, i) => (
+            <div
+              key={src}
+              className={`absolute inset-0 transition-opacity duration-1000 ${
+                i === currentImage ? 'opacity-30' : 'opacity-0'
+              }`}
+            >
+              <img src={src} alt="" className="w-full h-full object-cover" />
+            </div>
+          ))}
+        </div>
 
-          <p className="text-sm uppercase tracking-[0.3em] text-white/80 mb-4 font-medium">
+        {/* Content */}
+        <div className="relative z-10 flex-1 flex flex-col justify-center px-5 py-10 text-center text-white">
+          <Image
+            src="/images/logo.png"
+            alt={config.name}
+            width={140}
+            height={140}
+            className="mx-auto bg-white rounded-full p-3 mb-6"
+            priority
+          />
+
+          <p className="text-xs uppercase tracking-widest text-white/70 mb-2">
             {config.location}
           </p>
 
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight drop-shadow-lg">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">
             Unity K9 Express Rescue
-            <span className="block text-2xl md:text-4xl mt-3 font-light text-white/90">
-              & Outreach
-            </span>
           </h1>
+          <p className="text-lg sm:text-xl text-white/80 mb-4">& Outreach</p>
 
-          <p className="text-2xl md:text-3xl font-medium text-white mb-6 drop-shadow-md">
-            {config.tagline}
-          </p>
+          <p className="text-base sm:text-lg font-medium mb-3">{config.tagline}</p>
 
-          <p className="max-w-2xl mx-auto text-white/90 text-lg leading-relaxed mb-14 drop-shadow">
+          <p className="text-sm text-white/70 max-w-md mx-auto mb-8">
             {config.description}
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
             <Link
               href={config.links.foster}
               target="_blank"
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto px-12 py-5 bg-white text-gray-900 text-lg font-bold tracking-wide hover:bg-gray-100 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
+              className="bg-white text-[#0f2d4d] font-bold py-3 px-8 text-sm uppercase tracking-wide"
             >
-              BECOME A FOSTER
+              Become a Foster
             </Link>
             <Link
               href={config.links.transport}
               target="_blank"
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto px-12 py-5 border-2 border-white text-white text-lg font-bold tracking-wide hover:bg-white hover:text-gray-900 transition-all"
+              className="border-2 border-white text-white font-bold py-3 px-8 text-sm uppercase tracking-wide"
             >
-              BECOME A DRIVER
+              Become a Driver
             </Link>
           </div>
 
           <Link
             href={config.links.amazon}
             target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block text-white/80 hover:text-white border-b border-white/40 hover:border-white pb-1 transition-all text-lg"
+            className="text-white/70 text-sm underline"
           >
-            View Our Amazon Wishlist
+            View Amazon Wishlist
           </Link>
         </div>
-      </HeroCarousel>
 
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Support Our Mission
-          </h2>
-          <p className="text-gray-600 text-lg max-w-xl mx-auto mb-12">
-            100% of your donation goes directly to saving dogs. We are entirely volunteer-run with no paid staff.
-          </p>
-
-          <div className="flex flex-col md:flex-row items-center justify-center gap-12">
-            <Link
-              href={config.links.paypal}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-14 py-5 bg-[#1a4f8b] text-white text-lg font-bold tracking-wide hover:bg-[#0f2d4d] transition-all shadow-lg hover:shadow-xl"
-            >
-              DONATE VIA PAYPAL
-            </Link>
-
-            <div className="text-center">
-              <Image
-                src="/images/venmo-qr.png"
-                alt="Venmo QR Code"
-                width={160}
-                height={160}
-                className="mx-auto rounded-xl shadow-lg"
+        {/* Image dots */}
+        {images.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+            {images.map((_, i) => (
+              <div
+                key={i}
+                className={`h-1.5 rounded-full ${
+                  i === currentImage ? 'bg-white w-6' : 'bg-white/40 w-1.5'
+                }`}
               />
-              <p className="text-gray-600 mt-4">
-                Venmo: <span className="font-bold text-gray-900">{config.links.venmo}</span>
-              </p>
-            </div>
+            ))}
           </div>
-        </div>
+        )}
       </section>
 
-      <section className="py-20 bg-[#0f2d4d] text-white">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
-            <div>
-              <div className="text-5xl md:text-6xl font-bold mb-3">2,000+</div>
-              <div className="text-white/60 uppercase tracking-wider text-sm">Dogs Saved Yearly</div>
-            </div>
-            <div>
-              <div className="text-5xl md:text-6xl font-bold mb-3">100%</div>
-              <div className="text-white/60 uppercase tracking-wider text-sm">Volunteer Run</div>
-            </div>
-            <div>
-              <div className="text-5xl md:text-6xl font-bold mb-3">2021</div>
-              <div className="text-white/60 uppercase tracking-wider text-sm">Established</div>
-            </div>
-            <div>
-              <div className="text-5xl md:text-6xl font-bold mb-3">Kern</div>
-              <div className="text-white/60 uppercase tracking-wider text-sm">County Based</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Donate Section */}
+      <section className="bg-gray-50 px-5 py-16 text-center">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+          Support Our Mission
+        </h2>
+        <p className="text-gray-600 text-sm max-w-md mx-auto mb-8">
+          100% of donations go directly to saving dogs. We are entirely volunteer-run.
+        </p>
 
-      <footer className="py-20 bg-gray-900 text-white">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <Image
-            src="/images/logo.png"
-            alt={config.name}
-            width={90}
-            height={90}
-            className="mx-auto mb-6 bg-white rounded-full p-4"
-          />
-
-          <h3 className="text-xl font-bold mb-3">{config.name}</h3>
-          
-          <a 
-            href={`mailto:${config.email}`}
-            className="text-gray-400 hover:text-white transition-colors text-lg"
+        <div className="flex flex-col items-center gap-8">
+          <Link
+            href={config.links.paypal}
+            target="_blank"
+            className="bg-[#1a4f8b] text-white font-bold py-3 px-10 text-sm uppercase tracking-wide"
           >
-            {config.email}
-          </a>
+            Donate via PayPal
+          </Link>
 
-          <div className="flex items-center justify-center gap-10 mt-10">
-            <Link
-              href={config.links.facebook}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-400 hover:text-white transition-colors uppercase text-sm tracking-widest font-medium"
-            >
-              Facebook
-            </Link>
-            <Link
-              href={config.links.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-400 hover:text-white transition-colors uppercase text-sm tracking-widest font-medium"
-            >
-              Instagram
-            </Link>
-          </div>
-
-          <div className="mt-16 pt-10 border-t border-gray-800">
-            <p className="text-gray-500">
-              © {new Date().getFullYear()} {config.name}
-            </p>
+          <div>
+            <Image
+              src="/images/venmo-qr.png"
+              alt="Venmo"
+              width={120}
+              height={120}
+              className="mx-auto rounded-lg"
+            />
             <p className="text-gray-600 text-sm mt-2">
-              501(c)(3) Nonprofit Organization · Bakersfield, CA
+              Venmo: <strong>{config.links.venmo}</strong>
             </p>
           </div>
         </div>
+      </section>
+
+      {/* Stats */}
+      <section className="bg-[#0f2d4d] text-white px-5 py-12">
+        <div className="grid grid-cols-2 gap-6 max-w-lg mx-auto text-center">
+          <div>
+            <div className="text-3xl font-bold">2,000+</div>
+            <div className="text-xs text-white/60 uppercase">Dogs Saved Yearly</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold">100%</div>
+            <div className="text-xs text-white/60 uppercase">Volunteer Run</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold">2021</div>
+            <div className="text-xs text-white/60 uppercase">Established</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold">Kern</div>
+            <div className="text-xs text-white/60 uppercase">County Based</div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white px-5 py-12 text-center">
+        <Image
+          src="/images/logo.png"
+          alt={config.name}
+          width={60}
+          height={60}
+          className="mx-auto bg-white rounded-full p-1 mb-4"
+        />
+        <p className="font-bold mb-1">{config.name}</p>
+        <a href={`mailto:${config.email}`} className="text-gray-400 text-sm">
+          {config.email}
+        </a>
+
+        <div className="flex justify-center gap-6 mt-6">
+          <Link href={config.links.facebook} target="_blank" className="text-gray-400 text-xs uppercase tracking-wider">
+            Facebook
+          </Link>
+          <Link href={config.links.instagram} target="_blank" className="text-gray-400 text-xs uppercase tracking-wider">
+            Instagram
+          </Link>
+        </div>
+
+        <p className="text-gray-600 text-xs mt-8">
+          © {new Date().getFullYear()} {config.name}
+        </p>
       </footer>
     </main>
   );
